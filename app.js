@@ -38,7 +38,7 @@ const userRoutes =require('./routes/UserRoutes');
 
 const mongoose = require('mongoose');
 
-const dbUrl = process.env.dbUrl || 'mongodb://127.0.0.1:27017/yelp-camp';
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';//process.env.DB_URL
 
 mongoose.connect(dbUrl);
 
