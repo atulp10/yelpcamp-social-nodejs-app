@@ -6,7 +6,7 @@ const cities = require('./cities');
 const { descriptors, places } = require('./seedHelpers');
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
+mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp'); //'mongodb://127.0.0.1:27017/yelp-camp'
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error: '));
 db.once('open', () => {
@@ -17,7 +17,7 @@ const sample = array => array[Math.floor(Math.random() * array.length)];
 
 async function seedDB() {
     await Campground.deleteMany({});
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 50; i++) {
         const random1000 = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() * 20) + 10;
         const camp = new Campground({
@@ -35,12 +35,12 @@ async function seedDB() {
             },
             images: [
                 {
-                    url: 'https://res.cloudinary.com/dqlnftw5r/image/upload/v1688283857/YelpCamp/v7xstdhevxnsvtvkufws.jpg',
+                    url: 'https://res.cloudinary.com/dqlnftw5r/image/upload/v1688912209/YelpCamp/plcqlhf2evhpmpoa9o70.jpg',
                     filename: 'YelpCamp/s5nojlunjb8mwsuxobng',
 
                 },
                 {
-                    url: 'https://res.cloudinary.com/dqlnftw5r/image/upload/v1688202970/YelpCamp/g3ckyfxam77hchpzwbh3.jpg',
+                    url: 'https://res.cloudinary.com/dqlnftw5r/image/upload/v1688912211/YelpCamp/tmwdu906repz1zt1u58d.jpg',
                     filename: 'YelpCamp/yazyvse7ca19cafomrsr',
 
                 }

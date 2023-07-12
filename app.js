@@ -1,7 +1,16 @@
+// Any environment variable will not be accessible without configuring
+// dotenv module in the app.
+// console.log(process.env.NODE_ENV);
+// console.log(process.env.CLOUDINARY_CLOUD_NAME);
+
 if(process.env.NODE_ENV!=='production'){
     require('dotenv').config();
 }
-//console.log(process.env.CLOUDINARY_CLOUD_NAME);
+// Now the env vars will be available in the app, Dotenv is a 
+// zero-dependency module that loads environment variables from a .env file
+//  into process.env.
+// console.log(process.env.NODE_ENV);
+// console.log(process.env.CLOUDINARY_CLOUD_NAME);
 
 const express = require('express')
 const app = express()
@@ -38,7 +47,7 @@ const userRoutes =require('./routes/UserRoutes');
 
 const mongoose = require('mongoose');
 
-const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';//process.env.DB_URL
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp'; //mongodb://127.0.0.1:27017/yelp
 
 mongoose.connect(dbUrl);
 
