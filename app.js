@@ -49,16 +49,16 @@ const userRoutes = require('./routes/UserRoutes');
 
 const mongoose = require('mongoose');
 
-//const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp'; //mongodb://127.0.0.1:27017/yelp
+//const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp'; //mongodb://127.0.0.1:27017/yelp-camp
 
-//const dbUrl = process.env.NODE_ENV === 'production' ? process.env.DB_URL : 'mongodb://127.0.0.1:27017/yelp'
+//const dbUrl = process.env.NODE_ENV === 'production' ? process.env.DB_URL : 'mongodb://127.0.0.1:27017/yelp-camp'
 
 let dbUrl = '';
 if (process.env.NODE_ENV === 'production') {
     dbUrl = process.env.DB_URL;
 }
 else {
-    dbUrl = 'mongodb://127.0.0.1:27017/yelp';
+    dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp';
 }
 
 mongoose.connect(dbUrl);
