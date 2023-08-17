@@ -42,7 +42,7 @@ const helmet = require('helmet');
 
 const MongoStore = require('connect-mongo');
 // For mongo session store
-
+    
 const campgroundsRoutes = require('./routes/CampgroundRoutes');
 const reviewsRoutes = require('./routes/ReviewsRoutes');
 const userRoutes = require('./routes/UserRoutes');
