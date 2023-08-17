@@ -31,6 +31,8 @@
                         rows="3" required><%=camp.description %></textarea>
                 </div>
                 <div class="mb-3">
+                    <!-- Here, showing images' thumbnails for deletion purpose. Selected images' values(img.filename)
+                    will be passed in to deleteImages[] array. Each image has a unique filename, given by cloudinary. -->
                     <% camp.images.forEach((img,i)=>{%>
                         <img src="<%=img.thumbnail%>" class="img-thumbnail my-2" alt="">
                         <div class="form-check-inline">

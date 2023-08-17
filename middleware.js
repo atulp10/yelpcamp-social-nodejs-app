@@ -11,7 +11,8 @@ module.exports.isLoggedIn = (req, res, next) => {
     }
     next();
 }
-// isAuthenticated() is a method made by Passport on 'req' object.
+// isAuthenticated() is a method made by Passport on 'req' object. It returns true
+// for a logged in user and false for that is not.
 // isLoggedIn middleware is used here in the routes to make sure
 // that only a logged in user can edit/delete/create campgrounds.
 

@@ -8,8 +8,13 @@ const Campground = require('../models/campground');
 const { storage } = require('../cloudinary/CloudinaryIndex');
 
 const multer = require('multer');
+// Multer is a node.js middleware for handling multipart/form-data, 
+// which is primarily used for uploading files.
+// NOTE: Multer will not process any form which is not multipart 
+// enctype='multipart/form-data'.
 
 const upload = multer({ storage });
+// uploaded files are stored in the place defined in 'storage'.
 
 
 // isLoggedIn middleware is used here in the routes to make sure
@@ -35,7 +40,10 @@ const campgrounds = require('../controllers/CampgroundsControllers');
 router.route('/')
     .get(catchAsync(campgrounds.index))
     .post(isLoggedIn,upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground))
-    
+    // middlewares are executed in sequence here. First 'isLogedIn' is run, if no error, then 'validateCampground'
+    // and 'upload' is run, then 'createCampground' is run.
+    //'isLoggedIn' is added in post route to assure that new campground can not be posted by an unauthorized person
+    // by means of third party tools like postman.
 
 router.get('/new', isLoggedIn, campgrounds.renderNewForm)
 
