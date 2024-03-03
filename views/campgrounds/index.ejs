@@ -28,6 +28,18 @@
                         <a href="/campgrounds/<%=camp._id %>" class="btn btn-primary">
                             <%=camp.title %>
                         </a>
+
+                        <% if(currentUser && camp.author.equals(currentUser._id)){ %>
+                            <div class="card-body">
+                                <a href="/campgrounds/<%=camp._id%>/edit"
+                                    class="card-link btn btn-warning text-white">Edit</a>
+                                <form class="d-inline" action="/campgrounds/<%=camp._id%>?_method=delete" method="post">
+                                    <button class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                            <% } %>
+
+
                     </div>
                 </div>
             </div>
