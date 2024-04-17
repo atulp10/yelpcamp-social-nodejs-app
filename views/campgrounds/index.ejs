@@ -22,11 +22,9 @@
                         <p class="card-text text-muted">
                             <%=camp.location %>
                         </p>
-                        <p class="card-text">
-                            <%=camp.description %>
-                        </p>
+                        
                         <a href="/campgrounds/<%=camp._id %>" class="btn btn-primary">
-                            <%=camp.title %>
+                            View this site
                         </a>
 
                         <% if(currentUser && camp.author.equals(currentUser._id)){ %>
