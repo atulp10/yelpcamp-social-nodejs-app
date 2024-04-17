@@ -6,7 +6,7 @@
     <% for(let camp of camps){ %>
         <div class="card my-3">
             <div class="row">
-                <div class="col-4">
+                <div class="col-sm-4">
                     <% if(camp.images.length){ %>
                         <img src="<%=camp.images[0].url %>" class="img-fluid" alt="">
                         <% }else{ %>
@@ -14,10 +14,10 @@
                                 class="img-fluid" alt="">
                             <% } %>
                 </div>
-                <div class="col-8">
+                <div class="col-sm-8">
                     <div class="card-body">
                         <h4 class="card-title">
-                            <%=camp.title %> hello
+                            <%=camp.title %>
                         </h4>
                         <p class="card-text text-muted">
                             <%=camp.location %>
