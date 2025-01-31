@@ -3,6 +3,7 @@ const { campSchema } = require('../schemas')
 const Schema = mongoose.Schema
 const Review = require('./review');
 const { func } = require('joi');
+const cloudinary = require('cloudinary').v2;
 
 const imageSchema = new mongoose.Schema({
     url:String,
