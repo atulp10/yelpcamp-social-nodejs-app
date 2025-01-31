@@ -75,6 +75,10 @@ campgroundSchema.virtual('properties.popupMarkup').get(function(){
 //get deleted too.
 campgroundSchema.post('findOneAndDelete',async function(camp){
     await Review.deleteMany({_id:{$in:camp.reviews}});
-})
+    if(camp.images.length){
+        for(let img of camp.images){
+            cloudinary.uploader.destroy(img.filename);
+        }
+}})
 
 module.exports=mongoose.model('Campground',campgroundSchema)
