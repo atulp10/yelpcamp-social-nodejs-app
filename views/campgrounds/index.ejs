@@ -27,7 +27,7 @@
                             View this site
                         </a>
 
-                        <% if(currentUser && camp.author.equals(currentUser._id)){ %>
+                        <% if(currentUser && camp.author && camp.author.equals(currentUser._id)){ %>
                     
                                 <a href="/campgrounds/<%=camp._id%>/edit"
                                     class="card-link btn btn-warning text-white">Edit</a>

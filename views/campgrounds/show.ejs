@@ -38,12 +38,12 @@
                     <li class="list-group-item">
                         <%=camp.location %>
                     </li>
-                    <li class="list-group-item">Submitted by <%=camp.author.username %>
+                    <li class="list-group-item">Submitted by <%= camp.author ? camp.author.username : 'Unknown user' %>
                     </li>
                     <li class="list-group-item">Price : $ <%=camp.price %> per night
                     </li>
                 </ul>
-                <% if(currentUser && camp.author.equals(currentUser._id)){ %>
+                <% if(currentUser && camp.author && camp.author.equals(currentUser._id)){ %>
                     <div class="card-body row">
                         <div class="col-6">
                             <a href="/campgrounds/<%=camp._id%>/edit"
@@ -103,7 +103,7 @@
                                 <div class="card mb-3">
                                     <div class="card-body">
 
-                                        <h5 class="card-subtitle mb-2">by <%=review.author.username %>
+                                        <h5 class="card-subtitle mb-2">by <%= review.author ? review.author.username : 'Unknown user' %>
                                         </h5>
                                         <p class="starability-result" data-rating="<%=review.rating%>">
                                         </p>
@@ -111,7 +111,7 @@
                                             <%=review.body%>
                                         </p>
 
-                                        <% if(currentUser && review.author.equals(currentUser._id)){ %>
+                                        <% if(currentUser && review.author && review.author.equals(currentUser._id)){ %>
                                             <form
                                                 action="/campgrounds/<%=camp._id%>/reviews/<%=review._id%>?_method=delete"
                                                 method="post">
