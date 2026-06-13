@@ -129,3 +129,8 @@ function createApp(options = {}) {
 }
 
 module.exports = { createApp };
+
+// Render may still be configured with `node app.js` as its start command.
+if (require.main === module) {
+    require('./server');
+}
