@@ -1,22 +1,19 @@
-const express = require('express')
-const app = express();
-
-const router = express.Router({mergeParams:true});
-// mergeParams:true, because both paths will not catch id otherwise.
-
-const Campground = require('../models/campground');
-const Review = require('../models/review');
-const { reviewSchema } = require('../schemas');
+const express = require('express');
+const router = express.Router({ mergeParams: true });
 const catchAsync = require('../utilities/CatchAsync');
-const expressError = require('../utilities/ExpressError');
+const {
+    validateReview,
+    isLoggedIn,
+    isReviewAuthor,
+    validateObjectId,
+} = require('../middleware');
+const { protect } = require('../utilities/csrf');
+const reviews = require('../controllers/ReviewsController');
 
-const {  validateReview,isLoggedIn,isReviewAuthor } = require('../middleware');
+router.use(validateObjectId('id'));
+router.param('reviewId', validateObjectId('reviewId'));
 
-const reviews=require('../controllers/ReviewsController');
+router.post('/', isLoggedIn, protect, validateReview, catchAsync(reviews.createReview));
+router.delete('/:reviewId', isLoggedIn, protect, isReviewAuthor, catchAsync(reviews.deleteReview));
 
-//Route handlers for reviews
-router.post('/',isLoggedIn,validateReview, catchAsync(reviews.createReview));
-
-router.delete('/:reviewId',isLoggedIn,isReviewAuthor, catchAsync(reviews.deleteReview))
-
-module.exports=router;
+module.exports = router;

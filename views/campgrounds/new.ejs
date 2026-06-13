@@ -2,18 +2,19 @@
 
     <div class="row">
         <h2 class="text-center">Add new Campground</h2>
-        <div class="col-6 offset-3">
+        <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
             <form action="/campgrounds" method="post" novalidate class="validated-form" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="mb-3">
                     <label class="form-label" for="title">Title</label>
-                    <input class="form-control mb-2" type="text" id="title" name="campground[title]" required>
+                    <input class="form-control mb-2" type="text" id="title" name="campground[title]" minlength="3" maxlength="100" required>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="location">Location</label>
-                    <input type="text" class="form-control mb-2" id="location" name="campground[location]" required>
+                    <input type="text" class="form-control mb-2" id="location" name="campground[location]" minlength="3" maxlength="150" required>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
@@ -21,14 +22,15 @@
 
                 <div class="mb-3">
                     <label for="formFileMultiple" class="form-label">Images</label>
-                    <input class="form-control" type="file" name="image" id="formFileMultiple" multiple>
+                    <input class="form-control" type="file" name="image" id="formFileMultiple" accept="image/jpeg,image/png,image/webp" multiple>
+                    <div class="form-text">Up to 6 images, 5 MB each.</div>
                 </div>
                 <div class="mb-3">
                     <label for="price" class="form-label">Price</label>
                     <div class="input-group">
                         <span class="input-group-text" id="basic-addon1">$</span>
-                        <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="Username"
-                            aria-describedby="price" name="campground[price]" required>
+                        <input type="number" class="form-control" id="price" placeholder="0.00" aria-label="Price per night"
+                            aria-describedby="price" name="campground[price]" min="0" max="10000" step="0.01" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -38,7 +40,7 @@
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
                     <textarea name="campground[description]" id="description" class="form-control mb-2" cols="30"
-                        rows="3" required></textarea>
+                        rows="4" minlength="20" maxlength="2000" required></textarea>
                     <div class="valid-feedback">
                         Looks good!
                     </div>

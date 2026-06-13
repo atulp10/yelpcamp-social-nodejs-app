@@ -1,86 +1,63 @@
-const mongoose = require('mongoose')
-const { campSchema } = require('../schemas')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
 const Review = require('./review');
-const { func } = require('joi');
-const { cloudinary } = require('../cloudinary/CloudinaryIndex')
 
 const imageSchema = new mongoose.Schema({
-    url: String,
-    filename: String,
-})
+    url: { type: String, required: true, trim: true },
+    filename: { type: String, required: true, trim: true },
+}, { _id: false });
 
-// This imageSchema is defined for only one purpose.
-// When we render edit form for a campground, we need to see
-// thumbnails of the images, not the full sized images.
-// Hence, we define here a virtual property for imageSchema
-// which replaces the image url according to the pattern for 
-// thumbnail images as specified on 'cloudinary'.
-// w_200 means width 200 pixels.
 imageSchema.virtual('thumbnail').get(function () {
-    return this.url.replace('/upload', '/upload/w_200');
-})
-// added in edit.ejs: <%=img.thumbnail%> in forEach loop to render thumbnails.
+    return this.url.includes('/upload/')
+        ? this.url.replace('/upload/', '/upload/w_240,h_160,c_fill/')
+        : this.url;
+});
 
-
-// Mongoose Virtuals in JSON
-// By default, Mongoose does not include virtuals when you convert a document
-// to JSON. For example, if you pass a document to Express' res.json()
-// function, virtuals will not be included by default. To include 
-// virtuals in res.json(), you need to set the toJSON schema option
-// to { virtuals: true }.
-const opts = { toJSON: { virtuals: true } };
-// This is required to show camp's data in pop-up on the cluster map 
-// when a point is clicked.
-
-const campgroundSchema = new Schema({
-    title: String,
-    price: Number,
-    images: [imageSchema],
-    description: String,
-    location: String,
-    author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+const campgroundSchema = new mongoose.Schema({
+    title: { type: String, required: true, trim: true, minlength: 3, maxlength: 100 },
+    price: { type: Number, required: true, min: 0, max: 10000 },
+    images: {
+        type: [imageSchema],
+        validate: {
+            validator: images => images.length <= 6,
+            message: 'A campground can have at most 6 images.',
+        },
+        default: [],
     },
-    reviews: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review'
-    }],
+    description: { type: String, required: true, trim: true, minlength: 20, maxlength: 2000 },
+    location: { type: String, required: true, trim: true, minlength: 3, maxlength: 150 },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
     geometry: {
         type: {
-            type: String, // Don't do `{ location: { type: String } }`
-            enum: ['Point'], // 'location.type' must be 'Point'
-            required: true
+            type: String,
+            enum: ['Point'],
+            required: true,
         },
         coordinates: {
             type: [Number],
-            required: true
-        }
-    }
-}, opts);
+            required: true,
+            validate: {
+                validator(coordinates) {
+                    return coordinates.length === 2
+                        && coordinates.every(Number.isFinite)
+                        && coordinates[0] >= -180 && coordinates[0] <= 180
+                        && coordinates[1] >= -90 && coordinates[1] <= 90;
+                },
+                message: 'Geometry must contain valid longitude and latitude coordinates.',
+            },
+        },
+    },
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
 
-// This is a nested virtual property defined here where 'properties'
-// property has 'popupMarkup' property nested in it. It is done this 
-// way because mapbox looks for 'properties' to access data of the 
-// campground which is clicked on map.  
-campgroundSchema.virtual('properties.popupMarkup').get(function () {
-    return `<strong><a href='/campgrounds/${this._id}'>${this.title}</a></strong>
-    <p>${this.description.substring(0, 25)}...</p>`;
-})
+campgroundSchema.index({ geometry: '2dsphere' });
 
-
-
-//This is a mongoose middleware. It is created here so that 
-// whenever a campground is deleted, all its associated reviews
-//get deleted too.
 campgroundSchema.post('findOneAndDelete', async function (camp) {
-    await Review.deleteMany({ _id: { $in: camp.reviews } });
-    if (camp.images.length) {
-        for (let img of camp.images) {
-            cloudinary.uploader.destroy(img.filename);
-        }
-    }
-})
+    if (!camp) return;
+    await Review.deleteMany({ _id: { $in: camp.reviews || [] } });
+});
 
-module.exports = mongoose.model('Campground', campgroundSchema)
+module.exports = mongoose.model('Campground', campgroundSchema);

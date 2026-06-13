@@ -1,6 +1,6 @@
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark" style="background: linear-gradient(45deg, red, blue);">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold" href="#">YelpCamp</a>
+      <a class="navbar-brand fw-bold" href="/">YelpCamp</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -15,8 +15,11 @@
           <a class="nav-link"  href="/users/login">Login</a>
           <a class="nav-link" href="/users/register">Register</a>
           <% }else{ %>
-            <a class="nav-link" href="#"><%=currentUser.username %></a>
-          <a class="nav-link" href="/users/logout">Logout</a>
+            <span class="navbar-text me-2"><%=currentUser.username %></span>
+            <form action="/users/logout" method="post" class="d-flex">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn btn-link nav-link border-0" type="submit">Logout</button>
+            </form>
           <% } %>
         </div>
       </div>

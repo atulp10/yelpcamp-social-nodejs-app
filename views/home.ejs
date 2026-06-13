@@ -17,13 +17,16 @@
             <div>
                 <h3 class="float-md-start mb-0">YelpCamp</h3>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link active" aria-current="page" href="/">Home</a>
                     <a class="nav-link" href="/campgrounds">Campgrounds</a>
                     <% if(!currentUser) { %>
                     <a class="nav-link" href="/users/login">Login</a>
                     <a class="nav-link" href="/users/register">Register</a>
                     <% } else { %>
-                    <a class="nav-link" href="/users/logout">Logout</a>
+                    <form action="/users/logout" method="post">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-link nav-link border-0" type="submit">Logout</button>
+                    </form>
                     <% } %>
                 </nav>
             </div>
@@ -37,7 +40,7 @@
         </main>
 
         <footer class="mt-auto text-white-50">
-            <p>&copy; 2024 YelpCamp </p>
+            <p>&copy; <%= new Date().getFullYear() %> YelpCamp</p>
         </footer>
 
 

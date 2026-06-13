@@ -1,18 +1,23 @@
-const { default: mongoose } = require('mongoose');
-const passportLocalMongoose=require('passport-local-mongoose');
-// Passport-Local Mongoose is a Mongoose plugin that simplifies building 
-// username and password login with Passport.
+const mongoose = require('mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
 
-const userSchema=new mongoose.Schema({
-    email:{
-        type:String,
-        required:true,
-        unique:true
-    }
+const userSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        maxlength: 254,
+    },
+}, { timestamps: true });
+
+userSchema.plugin(passportLocalMongoose, {
+    usernameLowerCase: true,
+    usernameField: 'username',
+    limitAttempts: true,
+    maxAttempts: 10,
+    unlockInterval: 15 * 60 * 1000,
 });
 
-userSchema.plugin(passportLocalMongoose);
-// This plugin by passport automatically adds username and password(with hash nd salt)
-// properties to this userSchema. Also makes sure that usernames are unique.
-
-module.exports=mongoose.model('User',userSchema);
+module.exports = mongoose.model('User', userSchema);
