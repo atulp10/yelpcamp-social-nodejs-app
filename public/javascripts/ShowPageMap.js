@@ -1,25 +1,29 @@
+const mapContainer = document.getElementById('map');
+const coordinates = campground.geometry?.coordinates;
 
-const coordinates = campground.geometry && campground.geometry.coordinates;
-
-if (coordinates) {
+if (!mapToken || !Array.isArray(coordinates) || coordinates.length !== 2) {
+    mapContainer.hidden = true;
+} else {
     mapboxgl.accessToken = mapToken;
     const map = new mapboxgl.Map({
-        container: 'map', // container ID
-        style: 'mapbox://styles/mapbox/streets-v12', // style URL
-        center: coordinates, // starting position [lng, lat]
-        zoom: 9, // starting zoom
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: coordinates,
+        zoom: 9,
     });
 
-    const nav = new mapboxgl.NavigationControl();
-    map.addControl(nav, 'top-left');
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-    // Create a Marker and add it to the map.
+    const content = document.createElement('div');
+    const title = document.createElement('strong');
+    const location = document.createElement('p');
+    title.textContent = campground.title;
+    location.textContent = campground.location;
+    location.className = 'mb-0 mt-1';
+    content.append(title, location);
+
     new mapboxgl.Marker()
         .setLngLat(coordinates)
-        .setPopup(new mapboxgl
-            .Popup()
-            .setHTML(`<h3>${campground.title}</h3><p>${campground.location}</p>`)) // add popup
+        .setPopup(new mapboxgl.Popup().setDOMContent(content))
         .addTo(map);
-} else {
-    console.warn('Campground is missing geometry coordinates.');
 }

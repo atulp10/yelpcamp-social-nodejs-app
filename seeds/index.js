@@ -1,19 +1,12 @@
-// This file is for seeding (adding) data randomly to database,
-// outside of web application.
+// Replaces campground data with the deterministic demo records below.
 
-require('dotenv').config();
+const { config } = require('../config/env');
 const Campground = require('../models/campground');
+const Review = require('../models/review');
 const User = require('../models/user');
+const { destroyImages } = require('../cloudinary/CloudinaryIndex');
 
 const mongoose = require('mongoose');
-const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
-
-mongoose.connect(dbUrl); //'mongodb://127.0.0.1:27017/yelp-camp'
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error: '));
-db.once('open', () => {
-    console.log("Database connected.")
-});
 
 const campgrounds = [
     {
@@ -225,21 +218,37 @@ async function seedDB() {
     author = author || await User.findOne({ username: seedUsername }) || await User.findOne({});
 
     if (!author) {
-        author = await User.register(
-            new User({ username: seedUsername, email: process.env.SEED_EMAIL || 'seed@yelp-camp.demo' }),
-            process.env.SEED_PASSWORD || 'seedpassword'
-        );
+        throw new Error('Create a user first or set SEED_AUTHOR_ID to an existing user id.');
     }
 
+    const existingCampgrounds = await Campground.find({}).select('images reviews').lean();
+    const cloudinaryFilenames = existingCampgrounds
+        .flatMap(camp => camp.images || [])
+        .filter(image => image.url?.includes('res.cloudinary.com'))
+        .map(image => image.filename);
+    const reviewIds = existingCampgrounds.flatMap(camp => camp.reviews || []);
+
+    await destroyImages(cloudinaryFilenames);
+    await Review.deleteMany({ _id: { $in: reviewIds } });
     await Campground.deleteMany({});
-    for (let campground of campgrounds) {
-        const camp = new Campground({
-            author: author._id,
-            ...campground
-        });
-        await camp.save();
-    }
+    await Campground.insertMany(campgrounds.map(campground => ({ ...campground, author: author._id })));
 }
-seedDB().then(() => {
-    mongoose.connection.close();
-})
+
+async function run() {
+    const isRemoteDatabase = !config.dbUrl.includes('127.0.0.1') && !config.dbUrl.includes('localhost');
+    if (isRemoteDatabase && process.env.ALLOW_REMOTE_SEED !== 'true') {
+        throw new Error('Refusing to replace a remote database. Set ALLOW_REMOTE_SEED=true to confirm.');
+    }
+
+    await mongoose.connect(config.dbUrl);
+    console.log('Database connected.');
+    await seedDB();
+    console.log(`Seeded ${campgrounds.length} campgrounds.`);
+}
+
+run()
+    .catch(error => {
+        console.error('Seeding failed:', error);
+        process.exitCode = 1;
+    })
+    .finally(() => mongoose.connection.close());

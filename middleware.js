@@ -1,7 +1,8 @@
+const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const Review = require('./models/review');
-const { campSchema,reviewSchema } = require('./schemas');
-const expressError = require('./utilities/ExpressError');
+const { campSchema, reviewSchema, userSchema } = require('./schemas');
+const ExpressError = require('./utilities/ExpressError');
 
 module.exports.isLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
@@ -10,64 +11,52 @@ module.exports.isLoggedIn = (req, res, next) => {
         return res.redirect('/users/login');
     }
     next();
-}
-// isAuthenticated() is a method made by Passport on 'req' object. It returns true
-// for a logged in user and false for that is not.
-// isLoggedIn middleware is used here in the routes to make sure
-// that only a logged in user can edit/delete/create campgrounds.
-
-
+};
 
 module.exports.storeReturnTo = (req, res, next) => {
-    if (req.session.returnTo) {
-        res.locals.returnTo = req.session.returnTo;
+    if (req.session.returnTo) res.locals.returnTo = req.session.returnTo;
+    next();
+};
+
+module.exports.validateObjectId = parameter => (req, res, next) => {
+    if (!mongoose.isValidObjectId(req.params[parameter])) {
+        return next(new ExpressError('Invalid resource identifier.', 400));
     }
     next();
-}
-// This middleaware is created so that when a non-logged in user tries
-// to update/create a campground, and he is redirected to login page,
-// so when he logs in, he is redirected to the page he was opening i.e.
-// edit or new campground page, insteading of redirecting to 
-// 'all campgrounds' page.
+};
 
 module.exports.isAuthor = async (req, res, next) => {
-    const camp = await Campground.findById(req.params.id);
-    if (!camp.author.equals(req.user._id)) {
-        req.flash('error', 'You are not authorised to edit this campground.');
-        return res.redirect('/campgrounds/' + camp._id);
+    const camp = await Campground.findById(req.params.id).select('author');
+    if (!camp) return next(new ExpressError('The campground does not exist.', 404));
+    if (!camp.author?.equals(req.user._id)) {
+        req.flash('error', 'You are not authorized to modify this campground.');
+        return res.redirect(`/campgrounds/${camp._id}`);
     }
     next();
-}
+};
 
 module.exports.isReviewAuthor = async (req, res, next) => {
-    const review = await Review.findById(req.params.reviewId);
-    if (!review.author.equals(req.user._id)) {
-        req.flash('error', 'You are not authorised to edit this review.');
-        return res.redirect('/campgrounds/' + req.params.id);
+    const review = await Review.findById(req.params.reviewId).select('author');
+    if (!review) return next(new ExpressError('The review does not exist.', 404));
+    if (!review.author?.equals(req.user._id)) {
+        req.flash('error', 'You are not authorized to delete this review.');
+        return res.redirect(`/campgrounds/${req.params.id}`);
     }
     next();
+};
+
+function validate(schema) {
+    return (req, res, next) => {
+        const { error, value } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+        if (error) {
+            const message = error.details.map(detail => detail.message).join(', ');
+            return next(new ExpressError(message, 400));
+        }
+        req.body = value;
+        next();
+    };
 }
 
-// This function is for validating form data for an incoming
-// new/edit form post request. It utilises Joi schemas.
-module.exports.validateCampground = (req, res, next) => {
-    const { error } = campSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new expressError(msg, 400);
-    } else {
-        next();
-    }
-}
-
-// This function is for validating form data for an incoming
-// new/edit review post request
-module.exports.validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new expressError(msg, 400);
-    } else {
-        next();
-    }
-}
+module.exports.validateCampground = validate(campSchema);
+module.exports.validateReview = validate(reviewSchema);
+module.exports.validateUser = validate(userSchema);
